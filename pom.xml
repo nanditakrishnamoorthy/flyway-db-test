@@ -1,0 +1,97 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>flyway-db-test</groupId>
+  <artifactId>pom-flyway</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>Pom for flyway test</name>
+  <properties>
+    <db.name>postgres</db.name>
+		<flyway.url>jdbc:postgresql://localhost:32773/postgres</flyway.url>
+		<flyway.user>postgres</flyway.user>
+		<flyway.password>test</flyway.password>
+		<!-- This should be overridden by the child modules -->
+		<flyway.schemas>test_customer</flyway.schemas>
+  </properties>
+  <build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.flywaydb</groupId>
+					<artifactId>flyway-maven-plugin</artifactId>
+					<version>4.2.0</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.postgresql</groupId>
+							<artifactId>postgresql</artifactId>
+							<version>42.1.1</version>
+						</dependency>
+					</dependencies>
+					<executions>
+						<execution>
+							<id>migrate</id>
+							<phase>integration-test</phase>
+							<goals>
+								<goal>migrate</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+
+				<plugin>
+					<groupId>io.fabric8</groupId>
+					<artifactId>docker-maven-plugin</artifactId>
+					<version>0.21.0</version>
+					<configuration>
+						<images>
+							<image>
+								<alias>postgresql</alias>
+								<name>registry.access.redhat.com/rhscl/postgresql-95-rhel7:9.5</name>
+								<run>
+									<env>
+										<POSTGRESQL_USER>${flyway.user}</POSTGRESQL_USER>
+										<POSTGRESQL_PASSWORD>${flyway.password}</POSTGRESQL_PASSWORD>
+										<POSTGRESQL_DATABASE>${db.name}</POSTGRESQL_DATABASE>
+									</env>
+									<ports>
+										<port>localhost:host.port:5432</port>
+									</ports>
+									<wait>
+										<!-- Confusingly this is when the db is ready to accept connections -->
+										<log>server stopped</log>
+										<time>300000</time>
+									</wait>
+									<log />
+								</run>
+							</image>
+						</images>
+					</configuration>
+					<executions>
+						<execution>
+							<id>start</id>
+							<phase>pre-integration-test</phase>
+							<goals>
+								<goal>start</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>stop</id>
+							<phase>post-integration-test</phase>
+							<goals>
+								<goal>stop</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+  <distributionManagement>
+    <repository>
+      <id>d440668cf033deff7ec58ff23e5cb718196370f3f016c2319cf93bf98fa116af</id>
+      <name>nexus</name>
+      <url>http://localhost:32775/nexus</url>
+    </repository>
+  </distributionManagement>
+</project>
