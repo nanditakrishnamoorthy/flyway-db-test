@@ -1,2 +1,2 @@
-# flyway-db-test
-Test project to test jenkins
+# Flyway Migrate Project test
+This project is an example of how flyway migrate works with maven. 
