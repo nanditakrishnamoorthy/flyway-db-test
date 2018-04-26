@@ -1,2 +1,2 @@
 insert into test_customer.customer(name)
-values ('Test Data 1');
+values ('Test Data 22');
